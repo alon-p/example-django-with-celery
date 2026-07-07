@@ -8,10 +8,11 @@ by an AI coding agent** and transplanted into **your** project.
 
 In your own project, point your agent at the recipe and let it apply the pattern:
 
-> Read `CELERY_PATTERN.md` at
-> https://github.com/alon-p/example-django-with-celery/blob/main/CELERY_PATTERN.md
-> and apply the same Celery integration to this project, adapting the project and
-> app names to mine.
+```text
+Read CELERY_PATTERN.md at
+https://github.com/alon-p/example-django-with-celery/blob/main/CELERY_PATTERN.md
+and apply the same Celery integration to this project, adapting the project and app names to mine.
+```
 
 Prefer having the agent read the **raw file by URL** over cloning this repo into
 your workspace — that keeps this repo's own agent-instruction files
