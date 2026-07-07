@@ -1,6 +1,6 @@
 from celery import shared_task
 
-from app_example.services.notifcation_service import send_notification
+from app_example.services.notification_service import send_notification
 
 
 # An example task
