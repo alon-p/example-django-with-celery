@@ -208,7 +208,7 @@ class Testing(Development):
     ]
     DATABASES = values.DatabaseURLValue(
         # This is about defaulting to running vs docker db if you don't specify something else
-        "postgresql://example_django_with_celery_user:example_django_with_celery_pass@127.0.0.1:5433/example_django_with_celery_db")
+        "postgresql://example_django_with_celery_user:example_django_with_celery_pass@127.0.0.1:5432/example_django_with_celery_db")
 
     STORAGES = {
         "default":
