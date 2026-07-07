@@ -101,7 +101,8 @@ class Base(Configuration):
     # Database
     # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-    DATABASES = values.DatabaseURLValue("postgresql://example_django_with_celery_user:example_django_with_celery_pass@127.0.0.1:5432/example_django_with_celery_db")
+    DATABASES = values.DatabaseURLValue(
+        "postgresql://example_django_with_celery_user:example_django_with_celery_pass@127.0.0.1:5432/example_django_with_celery_db")
 
     # Password validation
     # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -177,6 +178,10 @@ class Base(Configuration):
     # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
     DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+    # An example of a celery config
+    CELERY_BROKER_URL = values.Value("redis://localhost:6379/0")
+    CELERY_BROKER_TRANSPORT_OPTIONS = {"global_keyprefix": "celery"}
+
 
 class Development(Base):
     CORS_ALLOW_ALL_ORIGINS = True
@@ -191,11 +196,18 @@ class Development(Base):
 
     }
 
+    # An example of a celery eager config for the development environment
+    CELERY_TASK_ALWAYS_EAGER = values.BooleanValue(
+        default=False, environ_prefix="CELERY", environ_name="TASK_ALWAYS_EAGER"
+    )
+
+
 class Testing(Development):
     PASSWORD_HASHERS = [
         'django.contrib.auth.hashers.MD5PasswordHasher',
     ]
-    DATABASES = values.DatabaseURLValue( # This is about defaulting to running vs docker db if you don't specify something else
+    DATABASES = values.DatabaseURLValue(
+        # This is about defaulting to running vs docker db if you don't specify something else
         "postgresql://example_django_with_celery_user:example_django_with_celery_pass@127.0.0.1:5433/example_django_with_celery_db")
 
     STORAGES = {
@@ -203,13 +215,19 @@ class Testing(Development):
             {"BACKEND": 'django.core.files.storage.InMemoryStorage'},
         "staticfiles":
             {"BACKEND": 'django.contrib.staticfiles.storage.StaticFilesStorage'}
-
     }
+
+    # An example of a skipping celery in testing
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+
 
 class Staging(Base):
-    DEBUG = False
+    DEBUG = values.BooleanValue(default=False, environ_prefix="")
     CORS_ALLOW_ALL_ORIGINS = False
-    AWS_STORAGE_BUCKET_NAME = values.Value(environ_name="S3_STORAGE")
+
+    # An example of a celery config for the staging environment using redis cloud on heroku
+    CELERY_BROKER_URL = values.Value(environ_prefix="", environ_name="REDISCLOUD_URL")
 
     REST_FRAMEWORK = {
         'DEFAULT_PERMISSION_CLASSES': [
@@ -225,7 +243,7 @@ class Staging(Base):
             'rest_framework.renderers.JSONRenderer',
         ),
         'PAGE_SIZE': 30,
-        'NUM_PROXIES':1 # make throttling around forward-for header spoofing
+        'NUM_PROXIES': 1  # make throttling around forward-for header spoofing
     }
 
     MIDDLEWARE = [
@@ -244,42 +262,5 @@ class Staging(Base):
     ]
 
 
-class Production(Base):
-    DEBUG = False
-    CORS_ALLOW_ALL_ORIGINS = False
-    AWS_STORAGE_BUCKET_NAME = values.Value(environ_name="S3_STORAGE")
-    # If heroku Add buckateer for s3 intergration
-    
-
-    REST_FRAMEWORK = {
-        'DEFAULT_PERMISSION_CLASSES': [
-            'rest_framework.permissions.IsAuthenticated',
-        ],
-        'DEFAULT_AUTHENTICATION_CLASSES': (
-            'rest_framework_simplejwt.authentication.JWTAuthentication',
-        ),
-        'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-        'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-        'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-        'DEFAULT_RENDERER_CLASSES': (
-            'rest_framework.renderers.JSONRenderer',
-        ),
-        'PAGE_SIZE': 30,
-        'NUM_PROXIES':1 # make throttling around forward-for header spoofing
-    }
-
-    MIDDLEWARE = [
-        'django.middleware.security.SecurityMiddleware',
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'corsheaders.middleware.CorsMiddleware',
-        'django.middleware.common.CommonMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.auth.middleware.LoginRequiredMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
-        "example_django_with_celery.middleware.TimezoneMiddleware",
-        'querycount.middleware.QueryCountMiddleware'
-
-    ]
-
+class Production(Staging):
+    pass
