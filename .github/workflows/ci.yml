@@ -1,0 +1,62 @@
+name: CI pipeline
+on: [push, pull_request] #Which triggers there are available?
+
+permissions:
+  security-events: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  test-job:
+    runs-on: ubuntu-latest
+    if: | # I don't want to run on dependebot pushes, just pr, but for the rest all, including all prs
+      (github.event_name == 'push' && github.actor != 'dependabot[bot]') ||
+      (github.event_name == 'pull_request')
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [ "3.14" ]
+        
+    container: python:${{ matrix.python-version }}-bookworm
+        
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres:17
+        # Provide the password for postgres
+        env:
+          POSTGRES_DB: django_db
+          POSTGRES_USER: django_user
+          POSTGRES_PASSWORD: django_pass
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - run: echo "Starting build"
+      - run: apt update && apt install -y gcc libpq-dev libz-dev
+      - name: Check out repository code
+        uses: actions/checkout@v5
+      - name: Install Poetry
+        run: |
+            curl -fsS -o get-poetry.py https://install.python-poetry.org
+            python get-poetry.py -y
+            echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Install dependencies
+        run: poetry install --no-interaction
+      - name: Run tests
+        run: poetry run python manage.py test -v 3
+        env:
+          DJANGO_SETTINGS_MODULE: "example_django_with_celery.settings"
+          DJANGO_CONFIGURATION: Testing
+          DATABASE_URL: "postgresql://django_user:django_pass@postgres/django_db"#  deploy:
+#    if: contains(fromJson('["refs/heads/prod"]'), github.ref)
+#    needs: [ test-job ]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: echo
+#        uses: echo "implement deploy"
+
