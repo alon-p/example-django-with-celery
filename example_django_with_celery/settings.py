@@ -48,7 +48,7 @@ class Base(Configuration):
         'django.contrib.messages',
         'django.contrib.staticfiles',
     ]
-    EXAMPLE_DJANGO_WITH_CELERY_APPS = []
+    EXAMPLE_DJANGO_WITH_CELERY_APPS = ["app_example"]
     INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + EXAMPLE_DJANGO_WITH_CELERY_APPS
 
     MIDDLEWARE = [
