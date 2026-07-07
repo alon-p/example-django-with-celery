@@ -52,11 +52,4 @@ jobs:
         env:
           DJANGO_SETTINGS_MODULE: "example_django_with_celery.settings"
           DJANGO_CONFIGURATION: Testing
-          DATABASE_URL: "postgresql://django_user:django_pass@postgres/django_db"#  deploy:
-#    if: contains(fromJson('["refs/heads/prod"]'), github.ref)
-#    needs: [ test-job ]
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: echo
-#        uses: echo "implement deploy"
-
+          DATABASE_URL: "postgresql://django_user:django_pass@postgres/django_db"
