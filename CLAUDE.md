@@ -1,12 +1,7 @@
 # Claude AI Instructions
 
-Please read and follow all instructions in the AGENTS.md file for this project.
+See **[AGENTS.md](./AGENTS.md)**.
 
-The AGENTS.md file contains comprehensive guidelines for:
-- Project overview and key technologies
-- Coding standards and best practices
-- Django and DRF patterns
-- Configuration management
-- Documentation requirements
-
-**IMPORTANT**: Always consult the KNOWLEDGEBASE.md file before implementing, researching, or planning any changes. It contains critical project-specific knowledge and architectural decisions.
+This repo is a **Celery-in-Django reference**, meant to be read by an agent and
+transplanted into another project. The pattern lives in
+**[CELERY_PATTERN.md](./CELERY_PATTERN.md)**.

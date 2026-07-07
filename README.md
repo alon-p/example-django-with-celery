@@ -1,125 +1,41 @@
-# What is this
+# Django + Celery — a reference pattern for AI coding agents
 
-## Technology
+This repo is **not** a starter you clone and run. It's a reference
+implementation of *how to add Celery to a Django project*, written to be **read
+by an AI coding agent** and transplanted into **your** project.
 
-Django + drf + django-filter
-DB in postgresql
-Django configurations for settings file
-Common practice middlewares (timezones, querycount)
+## How to use it
 
-## setup
-### Setup for development
+In your own project, point your agent at the recipe and let it apply the pattern:
 
-1. Python virtual environment:   
-We are using poetry to manage the projects dependencies.   
-   **Install Poetry** - https://python-poetry.org/docs/#installation
-        
+> Read `CELERY_PATTERN.md` at
+> https://github.com/alon-p/example-django-with-celery/blob/main/CELERY_PATTERN.md
+> and apply the same Celery integration to this project, adapting the project and
+> app names to mine.
 
-2. Get the code:    
-Clone this project    
-   ```
-   git clone git@github.com:alon-p/example-django-with-celery.git
-   ```
-   
+Prefer having the agent read the **raw file by URL** over cloning this repo into
+your workspace — that keeps this repo's own agent-instruction files
+(`AGENTS.md`, `CLAUDE.md`) out of your project's context.
 
-3. Install dependencies:    
-enter projects directory and install dependencies using Poetry. Poetry will look for pyproject.toml file
-   ```bash
-      cd example-django-with-celery
-      poetry install
-   ```
-      Activate the virtual environment:
-   ```bash
-      poetry shell
-   ```
+## What it demonstrates
 
-      > **Note:** If you're using Poetry version 2.0.0 or later:
-      > - Install the [poetry-plugin-shell](https://github.com/python-poetry/poetry-plugin-shell), or
-      > - Use `poetry env activate` to get the activation command
-   
----
-### From this point in the setup you should run the commands while you are inside the virtual env / poetry shell 
+A minimal, opinionated Celery setup you can lift piece by piece:
 
----
+- **Celery app bootstrap** — `example_django_with_celery/celery.py` and the
+  package `__init__.py` re-export that makes tasks register.
+- **Config in Django settings, per environment** — broker URL, an env-var eager
+  toggle for local dev, and always-eager in tests so the suite needs no broker
+  (`example_django_with_celery/settings.py`).
+- **A thin task delegating to a service** — `app_example/tasks.py` +
+  `app_example/services/notification_service.py`.
+- **Dispatching from a view** with `.delay()` — `app_example/views.py`.
+- **A test that exercises the task with no worker/broker** —
+  `app_example/tests/test_send_notification.py`.
+- **Broker + worker as docker-compose services** — the `redis` and
+  `celery_worker` services in `docker-compose.yml`.
 
-4. Database:    
-We are currently using postgres. You need to set up a user,
-   * After you have installed postgres, enter postgres cli client:    
-   ```
-   sudo su - postgres
-   psql
-   ```
-   * create a database, a user and a role
-    ```
-    CREATE DATABASE example_django_with_celery_db;
-    CREATE USER example_django_with_celery_user WITH PASSWORD 'example_django_with_celery_pass';
-    ALTER ROLE example_django_with_celery_user SET client_encoding TO 'utf8';
-    GRANT ALL PRIVILEGES ON DATABASE example_django_with_celery_db TO example_django_with_celery_user;
-    ALTER ROLE example_django_with_celery_user CREATEDB;
-   ```
-   * If PostgreSQL version is 15+
-   ```
-   \c example_django_with_celery_db
-   GRANT ALL ON SCHEMA public TO example_django_with_celery_user;
-   ```
-   * to exit postgres cli:   
-   `Ctrl+D`
-   
-     and then exit superuser shell   
-   `exit`
-   * Now you can migrate the data:
-   ```   
-   python manage.py migrate   
-   ```   
+## The recipe
 
-5. Create a superuser for yourself to start working
-    ```
-    python manage.py createsuperuser 
-   ```
-
-6. Run the dev server
-    ```
-   python manage.py runserver
-   ```
- 
-### tests
-
-```bash
-poetry run python manage.py test
-```
-## Production
-
-Ready to run as container (see dockerfile). Environment is determined by DJANGO_CONFIGURATION env variable
-which maps to class in settings.py. Note that in non local dev environments DEBUG=False so django won't magically serve statics
-You can use Nginx for that (before the django service, see, the [nginx.conf](./ecs/nginx.conf) for a reference)
-or install [whitenoise](https://whitenoise.evans.io/) and add it as a middleware. This is a common pattern for PAAS deployments
-
-## Setup for use in local environment as a "black box"
-e.g when you work on the frontend
-
-```bash
-docker-compose up
-```
-First run would be quite long because of docker building
-
-Postgres has some issues currently with start order, so if you see errors in the logs,
-just restart the compose a few times until it work
-
-
-### CI
-Depends on where you run, we support an initial github actions CI out of the box -declared [here](./.github/workflows/ci.yml) and 
-a full amazon environment with codebuild buildspec [file](./ecs/buildspec.yml) 
-
-## Not included libraries you might consider adding
-* [Django nested inlines](https://github.com/s-block/django-nested-inline) for "nesting inlines" in the admin
-* [Celery](https://docs.celeryq.dev/en/stable/) for async, scheduled or "out of request/response cycle" behavior
-* [django admin reorder](https://pypi.org/project/django-modeladmin-reorder/) to customize the admin further
-
-### Linting and formatting
-
-With [ruff](https://github.com/astral-sh/ruff), not automated yet as part of CI
-
-```bash
-ruff check . --fix
-ruff format
-```
+The full, file-by-file guide — every change, the reasoning behind it, plain-Django
+adaptations, and the identifiers to rename — lives in
+**[CELERY_PATTERN.md](./CELERY_PATTERN.md)**.

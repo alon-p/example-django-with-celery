@@ -1,147 +1,25 @@
-# AI Agent Instructions
+# For AI agents in this repo
 
-This is an opinionated Django REST API project using Poetry for dependency management.
+**This repo is a reference, not an application to build on.** It exists to teach
+one thing: how to add Celery to a Django project.
 
-## Project Overview
+## If you're here to learn the Celery pattern (most likely)
 
-- Poetry for dependency management
-- Django 6+ with Django REST Framework
-- PostgreSQL as the default database
-- django-configurations for environment-based settings
-- AWS deployment support (ECS, S3) and Heroku deployment option
-- Docker Compose for local development
-- GitHub Actions CI/CD workflow
+Read **[CELERY_PATTERN.md](./CELERY_PATTERN.md)**. It's the complete,
+file-by-file recipe, written to be transplanted into another project. Ignore the
+rest of this file — it's about maintaining *this* repo, not about your target
+project, and its conventions (Poetry, etc.) may not apply where you're working.
 
-## Key Technologies
+## If you're maintaining this reference repo
 
-- **Backend**: Django 6+, Django REST Framework 3.16+
-- **Database**: PostgreSQL (via psycopg 3.3+)
-- **Package Management**: Poetry
-- **Configuration**: django-configurations 2.5+
-- **API Documentation**: drf-spectacular (OpenAPI/Swagger)
-- **Authentication**: djangorestframework-simplejwt
-- **Storage**: django-storages with boto3 for S3
-- **Production Server**: Gunicorn
-- **Development**: django-extensions, django-querycount
+Keep the pattern trustworthy — an agent copies whatever is here, so a broken or
+stale example propagates into other people's projects.
 
-## Important Rules
-
-### Always Consult KNOWLEDGEBASE.md
-Before implementing, researching, or planning any changes, always consult the KNOWLEDGEBASE.md file first. This file contains critical project-specific knowledge about architectural decisions, common patterns, and important technical details discovered during development.
-
-### Always Create a Plan Before Implementation
-Before starting any implementation work, create a concise markdown plan outlining:
-1. What needs to be done
-2. Key steps or approach
-3. Potential challenges or considerations
-
-Keep plans brief and actionable.
-
-## Configuration & Settings
-
-### General Principles
-- All configuration belongs in settings.py - don't spray them throughout the code
-- Use django-configurations specific syntax with `Value` classes when adding configuration
-- Never commit secrets to version control
-- Use appropriate secret management services
-- Document secret requirements
-- Group related settings together
-- Include default values for all optional settings
-
-## Python Coding Standards
-
-### Python Tooling
-
-**IMPORTANT**: This is a **poetry-based project** - always use `poetry run` prefix for all Python commands. Never use `uv`, `python`, or `python3` directly.
-
-```bash
-# FIRST: Verify dependencies are installed (run if tools like ruff are missing)
-poetry install
-
-# Verify poetry environment is working
-poetry run python --version
-
-# Check code with ruff
-poetry run ruff check .
-
-# Auto-fix issues with ruff
-poetry run ruff check . --fix
-
-# Format code with ruff
-poetry run ruff format
-
-# Verify Python syntax
-poetry run python -m py_compile <file.py>
-```
-
-**If a tool like `ruff` is "Command not found"**, run `poetry install` or `make init-dev` first.
-
-### General
-- Prefer iteration and modularization over code duplication
-- Use descriptive variable names with auxiliary verbs (e.g., `is_active`, `has_permission`)
-- Refrain from using generic "helpers" and "utils" naming unless something is really not application/business logic related at all
-- Refrain from using "magic numbers" in your code, always name constants
-
-### Python-Specific
-- Adhere to PEP 8 standards
-- Never return anonymous tuples as return type, prefer dataclasses or named tuples
-- MUST use type hints for all function/method signatures (arguments/parameters and return types)
-- Add docstrings to methods/files/classes explaining main functionality
-- Use application logic custom Exception classes instead of generic raise
-- Use lowercase with underscores for directories and files
-- Prefer "string enum like" classes reference over plain "string" configuration repeated over the code
-- For constants not in enum classes, use UPPER_SNAKE_CASE naming convention
-- Check changed files with `ruff check .` and fix accordingly
-
-## Django REST Framework Best Practices
-
-### Security
-- Limit access via permission classes
-- Limit access to user-related only objects via queryset override
-- Use ReadOnlyModelViewSet when providing general configuration data to avoid users messing with it
-- Drop destructive viewset mixins (e.g., delete) if not needed explicitly
-
-### Best Practices
-- Use custom actions when built-in HTTP semantics don't fit well (e.g., prefer `/posts/1/like` custom action for liking a post over `POST /posts/1/likes/`)
-- Prefer custom `filterset_class` over adding filters in view queryset/actions
-- When you need to support "search like" filtering, use `filter_backends = [filters.SearchFilter]` but specify the search fields explicitly
-- Always use `extend_schema` to provide detailed schemas for the Swagger generator if using custom actions or overriding default serializer behavior
-
-## Django Admin Best Practices
-
-### Model Registration
-- Register all models in their respective app's `admin.py`
-- Use descriptive admin class names (e.g., `UserAdmin`, `ProductAdmin`)
-- Prefer the `@admin.register(Model)` decorator for cleaner registration
-
-### Admin Class Structure
-- Define `list_display` first
-- Follow with `list_filter`
-- Then define `search_fields`
-- Add `filter_horizontal` for many-to-many fields
-- Define `inlines` at the end
-- Refrain from using fields which are properties in `list_display` unless they are part of a `select_related` query
-
-### QuerySet Optimization
-- Override `get_queryset()` for performance optimization
-- Use `select_related()` for foreign key relationships
-- Use `prefetch_related()` for many-to-many relationships
-
-### Inline Classes
-- Set `show_change_link = True` for inlines when appropriate
-- Set `extra = 0` for inlines to prevent empty forms
-- Use `min_num` and `max_num` for inline limits
-
-## Documentation Standards
-
-### General Documentation
-- Document all custom management commands in README.md
-- Document link to Swagger/API docs in README.md
-
-### Configuration Documentation
-When making changes to configuration options in the project, all changes must be reflected in the README.md file:
-
-1. All new parameters must be documented in README.md
-2. If the project uses an `.env` file, provide an example in README.md without real values
-3. Update needed environment variables in the docker-compose file for local run
-
+- **Keep the Celery wiring correct and runnable.** Before changing the pattern,
+  verify tasks still register and a worker consumes a task (see the "Verify"
+  section of `CELERY_PATTERN.md`).
+- **Single source of truth:** `CELERY_PATTERN.md` explains the pattern; the
+  README and code comments link to it rather than re-explaining. Keep them in
+  sync when the pattern changes.
+- **Don't scope-creep.** Extra Django/DRF features dilute the reference. Only add
+  what makes the Celery pattern clearer.
