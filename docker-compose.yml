@@ -21,7 +21,7 @@ services:
       - POSTGRES_USER=example_django_with_celery_user
       - POSTGRES_PASSWORD=example_django_with_celery_pass
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
     healthcheck:
@@ -86,8 +86,6 @@ services:
     build:
       context: .
       dockerfile: ./ecs/Dockerfile
-    env_file:
-      - .env
     environment:
       - DJANGO_ALLOWED_HOSTS=web,localhost,127.0.0.1
       - DJANGO_CONFIGURATION=Development
