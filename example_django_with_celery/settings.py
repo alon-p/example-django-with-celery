@@ -179,8 +179,12 @@ class Base(Configuration):
     DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
     # An example of a celery config
-    CELERY_BROKER_URL = values.Value("redis://localhost:6379/0")
-    CELERY_BROKER_TRANSPORT_OPTIONS = {"global_keyprefix": "celery"}
+    CELERY_BROKER_URL = values.Value(
+        "redis://localhost:6379/0",
+        environ_prefix="",
+        environ_name="CELERY_BROKER_URL",
+    )
+    CELERY_BROKER_TRANSPORT_OPTIONS = {"global_keyprefix": "example_django_with_celery"}
 
 
 class Development(Base):

@@ -113,10 +113,19 @@ All Celery config is `CELERY_`-prefixed and grouped per environment.
 **Base** (shared) — the broker:
 ```python
 # An example of a celery config
-CELERY_BROKER_URL = values.Value("redis://localhost:6379/0")
-CELERY_BROKER_TRANSPORT_OPTIONS = {"global_keyprefix": "celery"}
+CELERY_BROKER_URL = values.Value(
+    "redis://localhost:6379/0",
+    environ_prefix="",
+    environ_name="CELERY_BROKER_URL",
+)
+CELERY_BROKER_TRANSPORT_OPTIONS = {"global_keyprefix": "example_django_with_celery"}
 ```
 - `CELERY_BROKER_URL` — where tasks are queued.
+- `environ_prefix="", environ_name="CELERY_BROKER_URL"` — without these,
+  django-configurations defaults to reading `DJANGO_CELERY_BROKER_URL`. That
+  silently ignores the plain `CELERY_BROKER_URL` env var that docker-compose
+  and production set (Step 7), leaving every environment pointed at
+  `localhost` instead of the real broker.
 - `global_keyprefix` — namespaces all keys in Redis, so multiple apps can safely
   share one Redis instance without colliding.
 
@@ -292,7 +301,8 @@ infrastructure involved.
 
 ## Rename checklist (do this before you finish)
 
-- [ ] Replaced **every** `example_django_with_celery` with the target project package.
+- [ ] Replaced **every** `example_django_with_celery` with the target project package,
+      including the `global_keyprefix` value in `CELERY_BROKER_TRANSPORT_OPTIONS` (Step 4).
 - [ ] Replaced **every** `app_example` with the target app.
 - [ ] `Celery("...")` in `celery.py` uses the target project name.
 - [ ] `-A <project>` in the worker command uses the target project name.
