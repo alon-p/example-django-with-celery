@@ -4,6 +4,9 @@ This repo is **not** a starter you clone and run. It's a reference
 implementation of *how to add Celery to a Django project*, written to be **read
 by an AI coding agent** and transplanted into **your** project.
 
+Scaffolded from
+[django-poetry-opinionated-cookiecutter](https://github.com/alonisser/django-poetry-opinionated-cookiecutter).
+
 ## How to use it
 
 In your own project, point your agent at the recipe and let it apply the pattern:
